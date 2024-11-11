@@ -4,20 +4,23 @@ WORKDIR /app/
 
 COPY . .
 
-RUN --mount=type=cache,target=/var/cache/apt \
+# RUN --mount=type=cache,target=/var/cache/apt \
+RUN \
     apt-get update && \
     apt-get install -y --no-install-recommends \
     nasm && \
     rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/app/target/   \
+# RUN --mount=type=cache,target=/usr/local/cargo/registry \
+#     --mount=type=cache,target=/app/target/   \
+RUN \
     cargo build --release && \
     mv target/release/piped-proxy .
 
 FROM debian:stable-slim
 
-RUN --mount=type=cache,target=/var/cache/apt \
+# RUN --mount=type=cache,target=/var/cache/apt \
+RUN \
     apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates && \

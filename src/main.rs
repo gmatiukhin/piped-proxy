@@ -2,8 +2,12 @@ mod ump_stream;
 mod utils;
 
 use actix_web::http::{Method, StatusCode};
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpResponseBuilder, HttpServer};
+use actix_web::{
+    middleware::Logger, web, App, HttpRequest, HttpResponse, HttpResponseBuilder, HttpServer,
+};
+use env_logger;
 use listenfd::ListenFd;
+use log;
 use once_cell::sync::Lazy;
 use qstring::QString;
 use regex::Regex;
@@ -51,10 +55,13 @@ fn try_get_fd_listeners() -> (Option<UnixListener>, Option<TcpListener>) {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Running server!");
+    env_logger::init();
 
     let mut server = HttpServer::new(|| {
         // match all requests
-        App::new().default_service(web::to(index))
+        App::new()
+            .default_service(web::to(index))
+            .wrap(Logger::default())
     });
 
     let fd_listeners = try_get_fd_listeners();
@@ -336,6 +343,7 @@ async fn index(req: HttpRequest) -> Result<HttpResponse, Box<dyn Error>> {
     };
 
     let mut request = Request::new(method, url);
+    // log::info!("{:?}", request);
 
     if is_web && video_playback {
         request.body_mut().replace(Body::from("x\0"));
@@ -354,6 +362,7 @@ async fn index(req: HttpRequest) -> Result<HttpResponse, Box<dyn Error>> {
     }
 
     let resp = CLIENT.execute(request).await?;
+    log::info!("{:?}", resp);
 
     let mut response = HttpResponse::build(resp.status());
 

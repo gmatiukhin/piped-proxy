@@ -28,6 +28,9 @@ bytes = "1.6.0"
 futures-util = "0.3.30"
 listenfd = "1.0.1"
 
+env_logger = "0.11.5"
+log = "0.4.22"
+
 [features]
 default = ["webp", "mimalloc", "reqwest-rustls", "qhash"]
 
